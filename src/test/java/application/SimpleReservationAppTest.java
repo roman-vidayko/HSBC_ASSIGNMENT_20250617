@@ -1,6 +1,7 @@
 package application;
 
 import io.muserver.MuServer;
+import java.util.Map;
 import org.junit.jupiter.api.*;
 import java.io.*;
 import java.net.*;
@@ -13,7 +14,7 @@ class SimpleReservationAppTest {
 
   @BeforeEach
   void setUp() {
-    server = SimpleReservationApp.runServer(port);
+    server = SimpleReservationApp.runServer(port, Map.of(2, 5, 4, 5, 6, 2));
   }
 
   @AfterEach
@@ -61,6 +62,35 @@ class SimpleReservationAppTest {
             + "{\"customerName\":\"Roman\",\"date\":\"2025-06-17\",\"tableSize\":2,\"timeSlotBegins\":\"02:30:00\"},"
             + "{\"customerName\":\"Michael\",\"date\":\"2025-06-17\",\"tableSize\":4,\"timeSlotBegins\":\"18:00:00\"}"
             + "]",
+        response3);
+
+  }
+
+  @Test
+  public void available_test() throws Exception {
+
+    //booking#1
+    String payload1 = "{\"customerName\":\"Roman\",\"date\":\"2025-06-17\",\"tableSize\":2,\"timeSlotBegins\":\"14:20:00\"}";
+    String response1 = send("/book", "POST", payload1);
+    Assertions.assertEquals("\"SUCCESS\"", response1);
+
+    //booking#2
+    String payload2 = "{\"customerName\":\"Michael\",\"date\":\"2025-06-17\",\"tableSize\":4,\"timeSlotBegins\":\"18:00:00\"}";
+    String response2 = send("/book", "POST", payload2);
+    Assertions.assertEquals("\"SUCCESS\"", response2);
+
+    //view_request
+    String response3 = send("/available/2025-06-17", "GET", null);
+    Assertions.assertEquals(
+        "{\"12:00\":{\"2\":5,\"4\":5,\"6\":2},\"12:20\":{\"2\":5,\"4\":5,\"6\":2},\"12:40\":{\"2\":5,\"4\":5,\"6\":2},"
+            + "\"13:00\":{\"2\":5,\"4\":5,\"6\":2},\"13:20\":{\"2\":5,\"4\":5,\"6\":2},\"13:40\":{\"2\":5,\"4\":5,\"6\":2},"
+            + "\"14:00\":{\"2\":5,\"4\":5,\"6\":2},\"14:20\":{\"2\":4,\"4\":5,\"6\":2},\"14:40\":{\"2\":4,\"4\":5,\"6\":2},"
+            + "\"15:00\":{\"2\":4,\"4\":5,\"6\":2},\"15:20\":{\"2\":4,\"4\":5,\"6\":2},\"15:40\":{\"2\":4,\"4\":5,\"6\":2},"
+            + "\"16:00\":{\"2\":4,\"4\":5,\"6\":2},\"16:20\":{\"2\":5,\"4\":5,\"6\":2},\"16:40\":{\"2\":5,\"4\":5,\"6\":2},"
+            + "\"17:00\":{\"2\":5,\"4\":5,\"6\":2},\"17:20\":{\"2\":5,\"4\":5,\"6\":2},\"17:40\":{\"2\":5,\"4\":5,\"6\":2},"
+            + "\"18:00\":{\"2\":5,\"4\":4,\"6\":2},\"18:20\":{\"2\":5,\"4\":4,\"6\":2},\"18:40\":{\"2\":5,\"4\":4,\"6\":2},"
+            + "\"19:00\":{\"2\":5,\"4\":4,\"6\":2},\"19:20\":{\"2\":5,\"4\":4,\"6\":2},\"19:40\":{\"2\":5,\"4\":4,\"6\":2},"
+            + "\"20:00\":{\"2\":5,\"4\":5,\"6\":2}}",
         response3);
 
   }
